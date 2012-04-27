@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Helps include files in template file.
+ * Helps include assets in template view.
  *		
  *		$assets = assets::instance('core', 'assets/');
  *		$assets->add('js/jquery.js'); // adds file
@@ -57,22 +57,32 @@ class Kohana_Assets {
 	 * 
 	 * @param string $path
 	 *		path to file, relative to the root (minus the asset's base_path)
+	 * @param string $type
+	 *		type of file, ie: js, css, view, config
 	 * @param array $attributes
 	 *		attributes to be applied to tag on render
-	 * @param string $type
-	 *		type of file, ie: js, css
 	 * @return Kohana_Asset this assest
 	 */
 	public function add($path, $type = null, array $attributes = array())
 	{
-		$asset = new asset(
-			(!preg_match('/^http/', $path)) ? $this->base_path : ''.$path,
-			$type,
-			$attributes
-		);
+		// add multiple assets
+		if($type == 'config') {
+			$config = kohana::$config->load($this->base_path.$path);
+			foreach($config as $item) {
+				$this->add($item->path, isset($item->type) ? $item->type : null, isset($item->attributes) ? $item->attributes : null);
+			}
 		
-		if(!$this->has_asset( $asset )) {
-			$this->files[$asset->type][$asset->path] = $asset;
+		// add single asset
+		}else{			
+			$asset = new asset(
+				(!preg_match('/^http/', $path)) ? $this->base_path : ''.$path,
+				$type,
+				$attributes
+			);
+			// check to see if it exists
+			if(!$this->has_asset( $asset )) {
+				$this->files[$asset->type][$asset->path] = $asset;
+			}
 		}
 		return $this;
 	}
