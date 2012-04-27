@@ -1,7 +1,7 @@
 Kohana Assets
 =============
 
-An easy to use Kohana asset manager. 
+An easy to use Kohana Assets manager. 
 
 ## Usage
 
