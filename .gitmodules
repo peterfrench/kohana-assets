@@ -1,0 +1,3 @@
+[submodule "classes/jsmin-php"]
+	path = classes/jsmin-php
+	url = git@github.com:peterfrench/jsmin-php.git
