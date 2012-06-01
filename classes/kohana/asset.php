@@ -17,7 +17,7 @@ class Kohana_Asset {
 	
 	public $attributes;
 	
-	protected static $types = array(
+	public static $types = array(
 		'css'	=> '/\.css$/',
 		'js'	=> '/\.js$/',
 		'view'	=> '',
@@ -63,7 +63,7 @@ class Kohana_Asset {
 	 */
 	public function render()
 	{		
-		switch($type) {
+		switch($this->type) {
 			case 'css' :
 				return html::style( $this->path, $this->attributes );
 				break;

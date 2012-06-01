@@ -34,10 +34,10 @@ class Kohana_Assets {
 	 * Get a singleton asset instance. 
 	 *
 	 *     // Load the default assets for current request
-	 *     $asset = asset::instance();
+	 *     $asset = assets::instance();
 	 *
 	 *     // Create a custom configured instance
-	 *     $asset = asset::instance('custom', '/assets');
+	 *     $asset = assets::instance('custom', '/assets');
 	 *
 	 * @param	string	instance name
 	 * @param   string  base path to files
@@ -45,11 +45,11 @@ class Kohana_Assets {
 	 */
 	public static function instance( $name = null, $base_path = null )
 	{
-		if($name === null) $name = asset::$default;
-		if(!isset(asset::$instances[$name])) {
-			asset::$instances[$name] = new Kohana_Asset( $base_path );
+		if($name === null) $name = assets::$default;
+		if(!isset(assets::$instances[$name])) {
+			assets::$instances[$name] = new Kohana_Assets( $base_path );
 		}
-		return asset::$instances[$name];
+		return assets::$instances[$name];
 	}
 	
 	/**
@@ -75,7 +75,7 @@ class Kohana_Assets {
 		// add single asset
 		}else{			
 			$asset = new asset(
-				(!preg_match('/^http/', $path)) ? $this->base_path : ''.$path,
+				(!preg_match('/^http/', $path)) ? $this->base_path.$path : ''.$path,
 				$type,
 				$attributes
 			);
@@ -114,12 +114,18 @@ class Kohana_Assets {
 	{
 		$html = '';
 		
-		foreach($this->files as $type => $paths) {
-			if(!isset($file_type) || (isset($file_type) && $type == $file_type)) {
+		// load group of assets
+		if($asset_type) {
+			foreach($this->files[$asset_type] as $asset) {
+				$html .= $asset."\n";
+			}			
+		// load all assets
+		}else{
+			foreach($this->files as $type => $paths) {
 				foreach($paths as $asset) {
 					$html .= $asset."\n";
 				}
-			}
+			}			
 		}
 		
 		return $html;	
