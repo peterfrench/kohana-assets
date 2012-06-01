@@ -11,22 +11,22 @@
  * 
  * @package    EdSolio
  * @author     EdSolio Team
- * @copyright  (c) 2010-2012 EdSolio Team
  */
 class Kohana_Assets {	
 	
 	public $base_path;
 	
-	public $files = array();
+	public $items = array();
 	
+	protected static $groups = array( 'head', 'body', 'footer' );
 	protected static $default = 'default';
 	protected static $instances = array();
 	
 	protected function __construct($base_path = null)
 	{
 		$this->base_path = $base_path;
-		foreach(asset::$types as $type => $reg)
-			$this->files[$type] = array();
+		foreach(self::$groups as $group)
+			$this->items[$group] = array();
 	}
 	
 	
@@ -63,25 +63,45 @@ class Kohana_Assets {
 	 *		attributes to be applied to tag on render
 	 * @return Kohana_Asset this assest
 	 */
-	public function add($path, $type = null, array $attributes = array())
+	public function add($path, $type = null, $group = null, array $attributes = array())
 	{
 		// add multiple assets
 		if($type == 'config') {
 			$config = kohana::$config->load($this->base_path.$path);
 			foreach($config as $item) {
-				$this->add($item->path, isset($item->type) ? $item->type : null, isset($item->attributes) ? $item->attributes : null);
+				$this->add(
+					$item['path'],
+					isset($group) ? $group : (isset($item['group']) ? $item['group'] : null),
+					isset($item['type']) ? $item['type'] : null,
+					isset($item['attributes']) ? $item['attributes'] : array()
+				);
 			}
 		
 		// add single asset
-		}else{			
+		}else{
 			$asset = new asset(
 				(!preg_match('/^http/', $path)) ? $this->base_path.$path : ''.$path,
 				$type,
 				$attributes
 			);
+			
+			// determine group
+			if(!$group) {
+				switch($asset->type) {
+					case 'css' :
+						$group = 'head';
+						break;
+					case 'js' :
+						$group = 'footer';
+						break;
+					default :
+						$group = 'body';
+				}
+			}
+			
 			// check to see if it exists
-			if(!$this->has_asset( $asset )) {
-				$this->files[$asset->type][$asset->path] = $asset;
+			if(!$this->has_asset( $asset, $group )) {
+				$this->items[$group][$asset->path] = $asset;
 			}
 		}
 		return $this;
@@ -96,36 +116,36 @@ class Kohana_Assets {
 	 * @return boolean
 	 *		True if asset already has file
 	 */
-	public function has_asset( asset $asset )
+	public function has_asset( asset $asset, $group )
 	{
-		return isset($this->files[$asset->type][$asset->path]) && $asset->equals( $this->files[$asset->type][$asset->path] );
+		return isset($this->items[$group][$asset->path]) && $asset->equals( $this->items[$group][$asset->path] );
 	}
 	
 	
 	/**
 	 * Returns the html for all the assets' files.
 	 * 
-	 * @param string $asset_type
-	 *		type to filter for, 'js', 'css', etc.
+	 * @param string $group
+	 *		group to display (head, body, footer)
 	 * @return string
 	 *		html for all the asset's files
 	 */
-	public function render($asset_type = null)
+	public function render($group = null)
 	{
 		$html = '';
 		
 		// load group of assets
-		if($asset_type) {
-			foreach($this->files[$asset_type] as $asset) {
+		if($group) {
+			foreach($this->items[$group] as $asset) {
 				$html .= $asset."\n";
 			}			
 		// load all assets
 		}else{
-			foreach($this->files as $type => $paths) {
-				foreach($paths as $asset) {
+			foreach($this->items as $group) {
+				foreach($group as $asset) {
 					$html .= $asset."\n";
 				}
-			}			
+			}
 		}
 		
 		return $html;	

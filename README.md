@@ -18,8 +18,8 @@ Rendering the assets is fairly straight forward.
   
     echo $assets;
 
-JS & CSS can be split up upon rendering.
+JS & CSS can be split up upon rendering. Unless specified, JS & CSS files will be added to the 'head' & 'footer' groups, respectfully.
 
-    echo $assets->render('css');
+    echo $assets->render('head');
     
-    echo $assets->render('js');
+    echo $assets->render('footer');

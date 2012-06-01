@@ -7,7 +7,6 @@
  * 
  * @package    EdSolio
  * @author     EdSolio Team
- * @copyright  (c) 2010-2012 EdSolio Team
  */
 class Kohana_Asset {	
 	
