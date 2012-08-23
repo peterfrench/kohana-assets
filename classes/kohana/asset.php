@@ -72,8 +72,11 @@ class Kohana_Asset {
 				break;
 			
 			case 'view' :
-				return view::factory($this->path)
-					->bind('attributes', $this->attributes);
+				$view = view::factory($this->path);
+				foreach($this->attributes as $attribute => $value) {
+					$view->bind($attribute, $value);
+				}
+				return $view->render();
 				break;
 			
 			default :
